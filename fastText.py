@@ -6,7 +6,7 @@ logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=loggin
 
 
 filePath = 'E:\\论文测试训练集\\corpusSegDone.txt'
-saveFilePath = 'E:\\论文测试训练集\\fasttext_s200_w6_pkuseg_MODEL.bin'
+saveFilePath = 'E:\\论文测试训练集\\fasttext_s200_w6_pkuseg_MODEL_try.bin'
 
 corpus = datapath(filePath)
 # w2vModel = word2vec.Word2Vec(sentences, size=200, window=5, min_count=5, iter=5,

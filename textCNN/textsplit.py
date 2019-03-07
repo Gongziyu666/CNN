@@ -9,7 +9,7 @@
 import logging
 import os
 
-from utils.pkuseg import PkusegUtils
+from utils.seg import PkusegUtils
 
 logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.INFO)
 
