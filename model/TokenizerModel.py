@@ -3,45 +3,39 @@
 # @Author : taojiang
 # @Email  : taojiang@64365.com
 # @Project : CNN
-# @FileName: BaseModel.py
+# @FileName: TokenizerModel.py
 # @Software: PyCharm
 
 import logging
 from keras import Sequential
-from keras.layers import Conv1D, MaxPool1D, Dropout, Flatten, Dense, Embedding
+from keras.layers import Conv1D, MaxPool1D, Dropout, Flatten, Dense, Embedding, MaxPooling1D
 from keras.preprocessing.text import Tokenizer
 from utils.string import category_to_id
 from utils.seg import JiebaUtils
 from keras_preprocessing.sequence import pad_sequences
 from keras.utils import to_categorical
+from model.CallBlack import LossHistory
 
 logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.INFO)
 
 
-def model(self, x, y):
+def do_train(x, y, history, maxlen=200, max_features=3000, embed_size=200):
     model = Sequential()
-    model.add(Conv1D(Embedding))
-    model.add(MaxPool1D(2))
-    model.add(Conv1D(filters=16, kernel_size=(3, 200), padding='same', activation='relu'))
-    model.add(MaxPool1D(2))
-    model.add(Dropout(rate=0.25))
-
-    model.add(Conv1D(filters=32, kernel_size=(3, 3), padding='same', activation='relu'))
-    model.add(MaxPool1D(pool_size=(2, 2)))
-    model.add(Conv1D(filters=32, kernel_size=(3, 3), padding='same', activation='relu'))
-    model.add(MaxPool1D(pool_size=(2, 2)))
-    model.add(Dropout(rate=0.25))
-
-    model.add(Conv1D(filters=64, kernel_size=(3, 3), padding='same', activation='relu'))
-    model.add(MaxPool1D(pool_size=(2, 2), strides=2))
-    model.add(Dropout(rate=0.25))
+    model.add(Embedding(max_features, embed_size, input_length=maxlen))
+    model.add(Dropout(0.2))
+    filter_size = [2, 3, 4, 5]
+    for fsz in filter_size:
+        model.add(Conv1D(filters=200, kernel_size=fsz, activation='relu', padding='same'))
+        model.add(MaxPooling1D(2))
+        model.add(Dropout(0.25))
     model.add(Flatten())
-    model.add(Dense(512, activation='relu'))
+    model.add(Dense(200, activation='relu'))
     model.add(Dense(10, activation='softmax'))
-
+    model.summary()
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
-    model.fit(x, y, batch_size=64, epochs=20, validation_split=0.2, shuffle=True)
+    model.fit(x, y, batch_size=64, epochs=3, validation_split=0.2, shuffle=True, callbacks=[history])
     return model
+
 
 def read_file(file):
     path = 'E:\\paper\\data\\'
@@ -69,8 +63,12 @@ if __name__ == '__main__':
     x_test = pad_sequences(x_test_seq, maxlen=200)
     y_train = to_categorical(y_train, num_classes=10)
     y_test = to_categorical(y_test, num_classes=10)
-    print(y_train[0])
-    print(x_train[0])
+    history = LossHistory()
+    model = do_train(x_train, y_train, history)
+    model.save(r'E:\paper\data\tokenizerModel.model')
+    loss, accuracy = model.evaluate(x_test, y_test)
+    print('loss = %s ======> accuracy = %s' % (loss, accuracy))
+    history.loss_plot('epoch')
 
 
 
